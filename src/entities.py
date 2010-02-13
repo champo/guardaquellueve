@@ -5,10 +5,10 @@ class Location(db.Model):
 	name = db.StringProperty(required=True)
 	timezone = db.IntegerProperty(required=True, default=0)
 
-	forecast = db.???()
-	next_rain_datetime = db.????()
-	last_broadcast_made = db.????()
-	changed_prediction = db.BOOLIANO()
+	forecast = db.StringProperty()
+	next_rain_datetime = db.DateTimeProperty()
+	last_broadcast_made = db.DateTimeProperty()
+	changed_prediction = db.BooleanProperty(default=0)
 
 
 class User(db.Model):

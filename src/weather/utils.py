@@ -55,5 +55,5 @@ def get_next_rainy_day(station, timezone):
 		for forecast in forecasts:
 			utc_time = _get_utc(delta, forecast[0], timezone)
 			if forecast[1] in RAINY_STRINGS:
-				return (str(utc_time), forecast[1])
+				return (utc_time, forecast[1])
 	return None
