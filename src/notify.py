@@ -21,6 +21,7 @@ class RainNotification(webapp.RequestHandler):
 
 		rainy_places = self._get_locations():
 		twitter = tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
+		now = datetime.datetine.utcnow()
 
 		for rainy_place in rainy_places:
 			users = User.all().filter('location =', rainy_place)
@@ -29,14 +30,17 @@ class RainNotification(webapp.RequestHandler):
 			for user in users:
 				twitter.send_direct_message(screen_name=user.screen_name, text=message)
 
-			#TODO: Mark this location as updated on the weather status!
+			rainy_place.last_broadcast_made = now
+
+		Location.put(rainy_places)
 
 
 class HourlyNotification(RainNotification):
 
 	def _format_message(location):
 
-		#TODO: If we already told this place of rain in the previous update, then send a "Still raining update" instead
+		if location.changed_prediction and location.last_broadcast_made > location.next_rain_datetime:
+			return "Sorry titan, sigue lloviendo en %s" % (location.name, )
 
 		return "Va a llover en una horita o dos en %s" % (location.name, )
 
