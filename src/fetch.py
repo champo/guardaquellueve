@@ -10,18 +10,18 @@ from weather.utils import get_next_rainy_day
 class FetchForecast(webapp.RequestHandler):
 	def get(self):
 		places = list(Location.all())
-		logging.debug(places)
 
 		for place in places:
 			forecast = get_next_rainy_day(place.station, place.timezone)
-			if not forecast:
+			if not forecast and place.next_rain_datetime:
 				place.forecast = "It will not rain in the next week!"
-			else:
-				if forecast[1] != place.forecast:
-					logging.debug("Updating forecast of %s to %s"%(place.station, str(forecast)))
-					place.forecast = forecast[1]
-					place.next_rain_datetime = forecast[0]
-					place.changed_prediction = True
+				place.next_rain_datetime = None
+				place.changed_prediction = True
+			if forecast and forecast[1] != place.forecast:
+				logging.debug("Updating forecast of %s to %s"%(place.station, str(forecast)))
+				place.forecast = forecast[1]
+				place.next_rain_datetime = forecast[0]
+				place.changed_prediction = True
 
 		db.put(places)
 
