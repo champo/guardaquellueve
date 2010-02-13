@@ -26,7 +26,7 @@ def main():
 	application = webapp.WSGIApplication([
 		('/cron/notify', RainNotification)
 		], debug=True)
-	run_wsgi_application(application)
+	run_wsgi_app(application)
 
 if __name__=="__main__":
 	main()
