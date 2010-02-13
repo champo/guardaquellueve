@@ -7,7 +7,7 @@ handlers:
 - url: /_ah/mail/.+
   script: mail.py
   login: admin
-- url: /cron/notify
+- url: /cron/notify/.+
   script: notify.py
   login: admin
 
