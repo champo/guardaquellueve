@@ -7,3 +7,4 @@ class Location(db.Model):
 class User(db.Model):
 	screen_name = db.StringProperty(required=True)
 	location = db.ReferenceProperty(Location)
+	prediction = db.StringProperty()
