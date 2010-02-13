@@ -10,7 +10,7 @@ handlers:
 - url: /cron/notify/.+
   script: notify.py
   login: admin
-- url: /cron/fetch/.+
+- url: /cron/fetch
   script: fetch.py
   login: admin
 - url: /favicon.ico
