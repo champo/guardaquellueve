@@ -1,0 +1,4 @@
+cron:
+- description: Send rain notifications
+  url: /cron/notify
+  schedule: every 2 hours
