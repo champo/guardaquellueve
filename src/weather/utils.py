@@ -1,6 +1,7 @@
 import datetime
 import re
 import urllib
+import logging
 
 # guardaquellueve
 
@@ -24,7 +25,10 @@ def get_forecast_for_day(station, day):
 	engine = re.compile('[0-9]{1,2}&nbsp;[AP]M')
 	findings = engine.search(doc)
 	while findings:
-		hours.append(findings.group().replace("&nbsp;", " "))
+		newh = findings.group().replace("&nbsp;", " ")
+		if newh[:2] == "12":
+			newh = "00"+newh[2:]
+		hours.append(newh)
 		doc = doc[findings.end():]
 		findings = engine.search(doc)
 	engine = re.compile('http://icons-pe.wxug.com/i/c/a/(nt_)?([a-z]+)\.gif')
@@ -41,7 +45,7 @@ def get_forecast_for_day(station, day):
 RAINY_STRINGS = ['chancerain', 'rain', 'tstorms', 'chancetstorms']
 
 def _get_utc(delta, time, timezone):
-	day = datetime.datetime.fromordinal((datetime.date.utctoday().toordinal()+delta))
+	day = datetime.datetime.fromordinal((datetime.datetime.utcnow().toordinal()+delta))
 	day += datetime.timedelta(0, 3600*(int(time.split(' ')[0])+12*int(time.split(' ')[1] == "PM")))
 	day += datetime.timedelta(0, 3600*int(timezone))
 	return day
@@ -54,6 +58,6 @@ def get_next_rainy_day(station, timezone):
 		forecasts = get_forecast_for_day(station, str(today+delta))
 		for forecast in forecasts:
 			utc_time = _get_utc(delta, forecast[0], timezone)
-			if forecast[1] in RAINY_STRINGS:
+			if utc_time > datetime.datetime.utcnow() and forecast[1] in RAINY_STRINGS:
 				return (utc_time, forecast[1])
 	return None
