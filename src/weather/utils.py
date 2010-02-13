@@ -14,7 +14,7 @@ def get_station_and_gmt(querystr):
 		return None
 	else:
 		gmt = re.search('\(GMT ([+-][0-9]{2})\)', doc).groups()[0]
-		retval = {'station': findings.groups()[0], 'gmt': gmt}
+		retval = {'station': findings.groups()[0], 'gmt': int(gmt)}
 		return retval
 
 def get_forecast_for_day(station, day):
