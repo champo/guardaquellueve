@@ -42,7 +42,7 @@ class HourlyNotification(RainNotification):
 
 	def _format_message(self, location):
 
-		if location.changed_prediction and (location.last_broadcaste_made is not Null or location.last_broadcast_made > location.next_rain_datetime):
+		if not location.changed_prediction and (location.last_broadcast_made is not None and location.last_broadcast_made > location.next_rain_datetime):
 			return "Sorry titan, sigue lloviendo en %s" % (location.name, )
 
 		return "Va a llover en una horita o dos en %s" % (location.name, )
