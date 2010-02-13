@@ -13,6 +13,9 @@ handlers:
 - url: /cron/fetch/.+
   script: fetch.py
   login: admin
+- url: /favicon.ico
+  static_files: static/images/favicon.ico
+  upload: static/images/favicon.ico
 
 inbound_services:
 - mail
