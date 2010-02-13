@@ -47,9 +47,9 @@ class HourlyNotification(RainNotification):
 	def _get_locations():
 		time_limit = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
 
-		return Location.all() \
+		return list(Location.all() \
 				.filter('next_rain_datetime <', time_limit) \
-				.filter('next_rain_datetime >', datetime.datetime.utcnow())
+				.filter('next_rain_datetime >', datetime.datetime.utcnow()))
 
 
 class DailyNotification(RainNotification):
@@ -61,7 +61,7 @@ class DailyNotification(RainNotification):
 	def _get_locations():
 		min_time = datetime.datetime.utcnow() + datetime.timedelta(days=1)
 
-		return Location.all().filter('next_rain_datetime >', min_time)
+		return list(Location.all().filter('next_rain_datetime >', min_time))
 
 def main():
 	logging.getLogger().setLevel(logging.DEBUG)

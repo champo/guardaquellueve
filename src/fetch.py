@@ -9,7 +9,7 @@ from weather.utils import get_next_rainy_day
 
 class FetchForecast(webapp.RequestHandler):
 	def get(self):
-		places = Location.all()
+		places = list(Location.all())
 		logging.debug(places)
 
 		for place in places:
