@@ -41,7 +41,7 @@ def get_forecast_for_day(station, day):
 RAINY_STRINGS = ['chancerain', 'rain', 'tstorms', 'chancetstorms']
 
 def _get_utc(delta, time, timezone):
-	day = datetime.datetime.fromordinal((datetime.date.today().toordinal()+delta))
+	day = datetime.datetime.fromordinal((datetime.date.utctoday().toordinal()+delta))
 	day += datetime.timedelta(0, 3600*(int(time.split(' ')[0])+12*int(time.split(' ')[1] == "PM")))
 	day += datetime.timedelta(0, 3600*int(timezone))
 	return day
