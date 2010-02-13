@@ -2,3 +2,6 @@ cron:
 - description: Send rain notifications
   url: /cron/notify
   schedule: every 2 hours
+- description: Fetch weather forecast
+  url: /cron/fetch
+  schedule: every 2 hours
