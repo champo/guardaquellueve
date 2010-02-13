@@ -3,6 +3,7 @@ import datetime
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext import db
 
 import tweepy
 
@@ -19,10 +20,11 @@ class RainNotification(webapp.RequestHandler):
 
 	def get(self):
 
-		rainy_places = self._get_locations():
+		rainy_places = self._get_locations()
 		twitter = tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
-		now = datetime.datetine.utcnow()
+		now = datetime.datetime.utcnow()
 
+		logging.debug([location.name for location in rainy_places])
 		for rainy_place in rainy_places:
 			users = User.all().filter('location =', rainy_place)
 			message = self._format_message(rainy_place)
@@ -32,19 +34,19 @@ class RainNotification(webapp.RequestHandler):
 
 			rainy_place.last_broadcast_made = now
 
-		Location.put(rainy_places)
+		db.put(rainy_places)
 
 
 class HourlyNotification(RainNotification):
 
-	def _format_message(location):
+	def _format_message(self, location):
 
-		if location.changed_prediction and location.last_broadcast_made > location.next_rain_datetime:
+		if location.changed_prediction and (location.last_broadcaste_made is not Null or location.last_broadcast_made > location.next_rain_datetime):
 			return "Sorry titan, sigue lloviendo en %s" % (location.name, )
 
 		return "Va a llover en una horita o dos en %s" % (location.name, )
 
-	def _get_locations():
+	def _get_locations(self):
 		time_limit = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
 
 		return list(Location.all() \
@@ -54,11 +56,13 @@ class HourlyNotification(RainNotification):
 
 class DailyNotification(RainNotification):
 
-	def _format_message(location):
+	def _format_message(self, location):
 
-		return "Parece que mañana llueve en %s" % (location.name, )
+		day = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'][location.next_rain_datetime.weekday()]
 
-	def _get_locations():
+		return u"Parece que el %s llueve en %s" % (day, location.name)
+
+	def _get_locations(self):
 		min_time = datetime.datetime.utcnow() + datetime.timedelta(days=1)
 
 		return list(Location.all().filter('next_rain_datetime >', min_time))
