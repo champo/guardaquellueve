@@ -10,6 +10,9 @@ handlers:
 - url: /cron/notify/.+
   script: notify.py
   login: admin
+- url: /cron/fetch/.+
+  script: fetch.py
+  login: admin
 
 inbound_services:
 - mail
