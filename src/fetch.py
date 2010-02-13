@@ -12,11 +12,14 @@ class FetchForecast(webapp.RequestHandler):
 		places = Location.all()
 
 		for place in places:
-			forecast = get_next_rainy_day(place.station)
+			forecast = get_next_rainy_day(place.station, place.timezone)
 			if not forecast:
 				place.prediction = "It will not rain in the next week!"
 			else:
-				place.prediction = forecast
+				if forecast[0] != place.forecast:
+					place.forecast = forecast[1]
+					place.next_rain_datetime = forecast[0]
+					place.changed_prediction = True
 
 		db.put(places)
 

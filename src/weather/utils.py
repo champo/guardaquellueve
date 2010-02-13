@@ -40,13 +40,20 @@ def get_forecast_for_day(station, day):
 
 RAINY_STRINGS = ['chancerain', 'rain', 'tstorms', 'chancetstorms']
 
-def get_next_rainy_day(station):
+def _get_utc(delta, time, timezone):
+	day = datetime.datetime.fromordinal((datetime.date.today().toordinal()+delta))
+	day += datetime.timedelta(0, 3600*(int(time.split(' ')[0])+12*int(time.split(' ')[1] == "PM")))
+	day += datetime.timedelta(0, 3600*int(timezone))
+	return day
+
+def get_next_rainy_day(station, timezone):
 	# returns None if there is no rainy day in the next 5 days
 	# returns "Day, Time, Forecast" if there is a rainy day
 	today = int(datetime.datetime.now().strftime("%j"))
-	for day in [ str(today+delta) for delta in range(5) ]:
-		forecasts = get_forecast_for_day(station, day)
+	for delta in range(5):
+		forecasts = get_forecast_for_day(station, str(today+delta))
 		for forecast in forecasts:
+			utc_time = _get_utc(delta, forecast[0], timezone)
 			if forecast[1] in RAINY_STRINGS:
-				return "%s, %s, %s"%(day, forecast[0], forecast[1])
+				return (str(utc_time), forecast[1])
 	return None
