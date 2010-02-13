@@ -6,18 +6,14 @@ import urllib
 
 # This is the "grab weather information" script
 
-def get_station_and_days(querystr):
-	engine = re.compile('/cgi-bin/findweather/getForecast\?query=zmw:([0-9.]+)&hourly=1&yday=([0-9]{1,3})')
+def get_station_and_gmt(querystr):
 	doc = urllib.urlopen("http://www.wunderground.com/cgi-bin/findweather/getForecast?wuSelect=WEATHER&query="+urllib.quote(querystr)).read()
-	findings = engine.search(doc)
+	findings = re.search('/cgi-bin/findweather/getForecast\?query=zmw:([0-9.]+)&hourly=1&yday=([0-9]{1,3})', doc)
 	if not findings:
 		return None
 	else:
-		retval = {'station': findings.groups()[0], 'days': []}
-		while findings:
-			retval['days'].append(findings.groups()[1])
-			doc = doc[findings.end():]
-			findings = engine.search(doc)
+		gmt = re.search('\(GMT ([+-][0-9]{2})\)', doc).groups()[0]
+		retval = {'station': findings.groups()[0], 'gmt': gmt}
 		return retval
 
 def get_forecast_for_day(station, day):
