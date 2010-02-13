@@ -7,3 +7,4 @@ class User(db.Model):
 class Location(db.Model):
 	station = db.StringProperty(required=True)
 	name = db.StringProperty(required=True)
+	prediction = db.StringProperty()
