@@ -20,7 +20,6 @@ class RainNotification(webapp.RequestHandler):
 		raise NotImplementedError()
 
 	def get(self):
-
 		rainy_places = self._get_locations()
 		twitter = tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
 		now = datetime.datetime.utcnow()
@@ -29,23 +28,19 @@ class RainNotification(webapp.RequestHandler):
 		for rainy_place in rainy_places:
 			users = User.all().filter('location =', rainy_place)
 			message = self._format_message(rainy_place)
-
 			for user in users:
 				twitter.send_direct_message(screen_name=user.screen_name, text=message)
-
-			rainy_place.last_broadcast_made = now
+			rainy_place.last_broadcast_made = BROADCAST_LLUVIA
 
 		db.put(rainy_places)
 
 
 class HourlyNotification(RainNotification):
-
 	def _format_message(self, location):
-
-		if not location.changed_prediction and (location.last_broadcast_made is not None and location.last_broadcast_made > location.next_rain_datetime):
+		if location.last_broadcast_made is BROADCAST_LLUVIA:
 			return "Sorry titan, sigue lloviendo en %s" % (location.name, )
-
-		return "Va a llover en una horita o dos en %s" % (location.name, )
+		else:
+			return "Va a llover en una horita o dos en %s" % (location.name, )
 
 	def _get_locations(self):
 		max_time = datetime.datetime.utcnow() + datetime.timedelta(hours=3, minutes=5)
