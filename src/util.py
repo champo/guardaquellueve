@@ -61,9 +61,24 @@ def follow(twitter, handle):
 		user = User(screen_name=handle)
 	else:
 		user.active = True
+		if user.location is not None:
+			user.put()
+			send_success_dm(twitter, handle)
+			return
 
 	relocate(twitter, user_data.location, user)
 	user.put()
+
+def refollow(twitter, handle):
+	he_follows = twitter.exists_friendship(user_a=handle, user_b='guardaquellueve')
+	if not he_follows:
+		text = "Che @%s haceme follow o no te puedo mandar updates! Hace follow y manda un DM con '%s'" % (handle, RESTART_KEYWORD)
+		twitter.update_status(status=text)
+		logging.debug('User %s tried to restart but its not following me' % (handle, ))
+		return
+
+	follow(twitter, handle)
+
 
 def relocate(twitter, location, user):
 	location = find_location(location)

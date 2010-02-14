@@ -13,6 +13,7 @@ class TwitterMailHandler(InboundMailHandler):
 
 	def receive(self, mail_message):
 		sender = mail_message.sender
+		logging.debug([body.decode() for type, body in mail_message.bodies()])
 		body = mail_message.bodies()
 
 		if sender.find('twitter-dm-bot') != -1:
@@ -25,15 +26,27 @@ class TwitterMailHandler(InboundMailHandler):
 
 	def dm(self, bodies):
 		text_body = [body.decode() for type, body in bodies if type == 'text/plain'][0]
-		dm_body, sender = [val.strip() for val in text_body.split('\n')[0:2]]
-		sender = sender.split(' ')[-1]
+		sender = re.search('twitter.com/([^ \n\r\t]+)', text_body).groups()[0]
+
+		text_lines = text_body.split('\n')
+		dm_lines = []
+		for line in text_lines:
+			if line.find(sender) == -1:
+				dm_lines.append(line)
+			else:
+				break
+
+		dm_body = ''.join(dm_lines).strip() \
+				.replace('\n', ' ') \
+				.replace('\t', ' ') \
+				.replace('\r', ' ')
 
 		twitter = login_twitter_bot()
 
 		if dm_body == STOP_KEYWORD:
 			unfollow(twitter, sender)
 		elif dm_body == RESTART_KEYWORD:
-			follow(twitter, sender)
+			refollow(twitter, sender)
 		else:
 			user = User.all().filter('screen_name =', sender).get()
 			if user is None:
