@@ -22,13 +22,12 @@ class RainNotification(webapp.RequestHandler):
 	def get(self):
 		all_places = list(Location.all())
 		rainy_places = self._get_locations(all_places)
-		twitter = tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
-		now = datetime.datetime.utcnow()
+		twitter = login_twitter_bot()
 
 		logging.debug("The rainy places are: "+str([location.name for location in rainy_places]))
 		for place in all_places:
 			if place in rainy_places:
-				users = User.all().filter('location =', place)
+				users = User.all().filter('location =', place).filter('active =', True)
 				logging.debug("Sending messages to these users: "+str(list(users)))
 				message = self._format_message(place)
 				logging.debug("The message being sent is: "+message)
