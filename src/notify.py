@@ -20,35 +20,39 @@ class RainNotification(webapp.RequestHandler):
 		raise NotImplementedError()
 
 	def get(self):
-		rainy_places = self._get_locations()
+		all_places = list(Location.all())
+		rainy_places = self._get_locations(all_places)
 		twitter = tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
 		now = datetime.datetime.utcnow()
 
 		logging.debug([location.name for location in rainy_places])
-		for rainy_place in rainy_places:
-			users = User.all().filter('location =', rainy_place)
-			message = self._format_message(rainy_place)
-			for user in users:
-				twitter.send_direct_message(screen_name=user.screen_name, text=message)
-			rainy_place.last_broadcast_made = BROADCAST_LLUVIA
+		for places in all_places:
+			if place in rainy_places:
+				users = User.all().filter('location =', place)
+				message = self._format_message(place)
+				for user in users:
+					twitter.send_direct_message(screen_name=user.screen_name, text=message)
+				place.last_broadcast_rain = True
+			else:
+				place.last_broadcast_rain = False
 
-		db.put(rainy_places)
+		db.put(places)
 
 
 class HourlyNotification(RainNotification):
 	def _format_message(self, location):
-		if location.last_broadcast_made is BROADCAST_LLUVIA:
-			return "Sorry titan, sigue lloviendo en %s" % (location.name, )
+		if location.last_broadcast_rain:
+			return "Sigue lloviendo en %s!" % (location.name, )
 		else:
-			return "Va a llover en una horita o dos en %s" % (location.name, )
+			return "Va a llover en menos de tres horas en %s" % (location.name, )
 
-	def _get_locations(self):
+	def _get_locations(self, location_list):
 		max_time = datetime.datetime.utcnow() + datetime.timedelta(hours=3, minutes=5)
 		min_time = datetime.datetime.utcnow() - datetime.timedelta(hours=3, minutes=5)
 
-		return list(Location.all() \
-				.filter('next_rain_datetime <', max_time) \
-				.filter('next_rain_datetime >', min_time))
+		return [ l for l in location_list
+			if l.next_rain_datetime < max_time
+			and l.next_rain_datetime > min_time]
 
 
 class DailyNotification(RainNotification):
@@ -57,7 +61,7 @@ class DailyNotification(RainNotification):
 
 		day = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'][location.next_rain_datetime.weekday()]
 
-		return u"Parece que el %s llueve en %s" % (day, location.name)
+		return u"Está pronosticado lluvia para el día %s en tu ciudad, %s." % (day, location.name)
 
 	def _get_locations(self):
 		min_time = datetime.datetime.utcnow() + datetime.timedelta(hours=22)

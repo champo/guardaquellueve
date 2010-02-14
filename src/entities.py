@@ -7,7 +7,7 @@ class Location(db.Model):
 
 	forecast = db.StringProperty()
 	next_rain_datetime = db.DateTimeProperty()
-	last_broadcast_made = db.DateTimeProperty()
+	last_broadcast_rain = db.BooleanProperty(default=False)
 	changed_prediction = db.BooleanProperty(default=False)
 
 

@@ -1,10 +1,10 @@
 cron:
 - description: Send rain notifications
   url: /cron/notify/hourly
-  schedule: every 3 hours
+  schedule: every 6 hours
 - description: Send daily rain notifications
   url: /cron/notify/daily
-  schedule: every 24 hours
+  schedule: every 22 hours
 - description: Fetch weather forecast
   url: /cron/fetch
   schedule: every 2 hours
