@@ -29,7 +29,7 @@ class RainNotification(webapp.RequestHandler):
 		for place in all_places:
 			if place in rainy_places:
 				users = User.all().filter('location =', place)
-				logging.debug("Sending messages to these users: "+str(list(users)))
+				logging.debug("Sending messages to these users: "+str([u.screen_name for u in users]))
 				message = self._format_message(place)
 				logging.debug("The message being sent is: "+message)
 				for user in users:
