@@ -48,11 +48,12 @@ class HourlyNotification(RainNotification):
 		return "Va a llover en una horita o dos en %s" % (location.name, )
 
 	def _get_locations(self):
-		time_limit = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+		max_time = datetime.datetime.utcnow() + datetime.timedelta(hours=3, minutes=5)
+		min_time = datetime.datetime.utcnow() - datetime.timedelta(hours=3, minutes=5)
 
 		return list(Location.all() \
-				.filter('next_rain_datetime <', time_limit) \
-				.filter('next_rain_datetime >', datetime.datetime.utcnow()))
+				.filter('next_rain_datetime <', max_time) \
+				.filter('next_rain_datetime >', min_time))
 
 
 class DailyNotification(RainNotification):
@@ -64,7 +65,7 @@ class DailyNotification(RainNotification):
 		return u"Parece que el %s llueve en %s" % (day, location.name)
 
 	def _get_locations(self):
-		min_time = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+		min_time = datetime.datetime.utcnow() + datetime.timedelta(hours=22)
 
 		return list(Location.all().filter('next_rain_datetime >', min_time))
 
