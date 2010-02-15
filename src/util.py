@@ -73,7 +73,12 @@ def refollow(twitter, handle):
 	he_follows = twitter.exists_friendship(user_a=handle, user_b='guardaquellueve')
 	if not he_follows:
 		text = "Che @%s haceme follow o no te puedo mandar updates! Hace follow y manda un DM con '%s'" % (handle, RESTART_KEYWORD)
-		twitter.update_status(status=text)
+		try:
+			last_status = twitter.user_timeline(screen_name=handle)[0].id
+		except:
+			last_status = None
+
+		twitter.update_status(status=text, in_reply_to_status_id=last_status)
 		logging.debug('User %s tried to restart but its not following me' % (handle, ))
 		return
 

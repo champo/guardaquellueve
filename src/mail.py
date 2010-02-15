@@ -13,7 +13,6 @@ class TwitterMailHandler(InboundMailHandler):
 
 	def receive(self, mail_message):
 		sender = mail_message.sender
-		logging.debug([body.decode() for type, body in mail_message.bodies()])
 		body = mail_message.bodies()
 
 		if sender.find('twitter-dm-bot') != -1:
