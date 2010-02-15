@@ -1,3 +1,5 @@
+#! /usr/bin/env python2.5
+#-*- coding: utf-8 -*-
 import datetime
 import re
 import urllib
@@ -8,6 +10,7 @@ import logging
 # This is the "grab weather information" script
 
 def get_station_and_gmt(querystr):
+	querystr = querystr.replace('ÜT: ', '')
 	doc = urllib.urlopen("http://www.wunderground.com/cgi-bin/findweather/getForecast?wuSelect=WEATHER&query="+urllib.quote(querystr)).read()
 	findings = re.search('/cgi-bin/findweather/getForecast\?query=zmw:([0-9.]+)&hourly=1&yday=([0-9]{1,3})', doc)
 	if not findings:

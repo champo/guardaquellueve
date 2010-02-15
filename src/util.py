@@ -95,28 +95,21 @@ def relocate(twitter, location, user):
 	send_success_dm(twitter, user.screen_name)
 
 def find_location(location):
-
 	if location is None:
 		return None
 
-	try:
-		location = location.strip().encode('ascii', 'ignore')
-	except:
-		location = location.strip().decode('ascii', 'ignore')
-	location_entity = Location.all().filter('name =', location).get()
+	response = get_station_and_gmt(location)
+	if response is None:
+		return None
+
+	station = response['station']
+	timezone = response['gmt']
+	name = response['name']
+	location_entity = Location.all().filter('station =', station).get()
+
 	if location_entity is None:
-		response = get_station_and_gmt(location)
-		if response is None:
-			return None
-
-		station = response['station']
-		timezone = response['gmt']
-		name = response['name']
-		location_entity = Location.all().filter('station =', station).get()
-
-		if location_entity is None:
-			location_entity = Location(name=name, station=station, timezone=timezone)
-			location_entity.put()
+		location_entity = Location(name=name, station=station, timezone=timezone)
+		location_entity.put()
 
 	return location_entity
 
