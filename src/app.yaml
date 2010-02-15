@@ -7,12 +7,18 @@ handlers:
 - url: /_ah/mail/.+
   script: mail.py
   login: admin
+
 - url: /cron/notify/.+
   script: notify.py
   login: admin
 - url: /cron/fetch
   script: fetch.py
   login: admin
+
+- url: /task/fetch_location
+  script: location_fetch.py
+  login:admin
+
 - url: /favicon.ico
   static_files: static/images/favicon.ico
   upload: static/images/favicon.ico

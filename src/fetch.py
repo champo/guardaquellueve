@@ -3,25 +3,17 @@ import datetime
 
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.labs import taskqueue
 
+from queue import QueueHandler
 from entities import Location, User
 from weather.utils import get_next_rainy_day
 
 class FetchForecast(webapp.RequestHandler):
 	def get(self):
-		places = list(Location.all())
-		for place in places:
-			forecast = get_next_rainy_day(place.station, place.timezone)
-			if not forecast and place.next_rain_datetime:
-				place.forecast = "It will not rain in the next week!"
-				place.next_rain_datetime = None
-				place.changed_prediction = True
-			if forecast and forecast[0] != place.next_rain_datetime:
-				logging.debug("Updating forecast of %s to %s"%(place.station, str(forecast)))
-				place.forecast = forecast[1]
-				place.next_rain_datetime = forecast[0]
-				place.changed_prediction = True
-		db.put(places)
+		places = list(Location.all(keys_only=True))
+		for i in range(len(places)):
+			QueueHandler.queue_fetch(places[i], 5*i)
 
 def main():
 	application = webapp.WSGIApplication([
