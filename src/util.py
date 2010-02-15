@@ -99,7 +99,7 @@ def find_location(location):
 	if location is None:
 		return None
 
-	location = location.strip().encode('utf8')
+	location = location.strip().decode('utf-8', 'ignore')
 	location_entity = Location.all().filter('name =', location).get()
 	if location_entity is None:
 		response = get_station_and_gmt(location)
@@ -108,10 +108,11 @@ def find_location(location):
 
 		station = response['station']
 		timezone = response['gmt']
+		name = response['name']
 		location_entity = Location.all().filter('station =', station).get()
 
 		if location_entity is None:
-			location_entity = Location(name=location, station=station, timezone=timezone)
+			location_entity = Location(name=name, station=station, timezone=timezone)
 			location_entity.put()
 
 	return location_entity

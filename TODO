@@ -6,4 +6,4 @@
     * 'ayuda' debería decirte que comandos hay disponibles
     * Buscar al usuario tendría que hacerse al escribir "mudarme a" o algo parecido
     * hacer una queue para las API calls a twitter
-
+    * 'pronostico' manda el mensaje de acuerdo al pronostico en la location del user
