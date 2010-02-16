@@ -6,6 +6,7 @@ import tweepy
 
 from entities import Location, User
 from weather.utils import *
+import credentials
 
 STOP_KEYWORD = 'basta'
 RESTART_KEYWORD = 'volve'
@@ -15,7 +16,7 @@ ABOUT_KEYWORD = 'about'
 FORECAST_KEYWORD = 'pronosticar'
 
 def login_twitter_bot():
-	return tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
+	return tweepy.API(auth_handler=tweepy.BasicAuthHandler(credentials.USERNAME, credentials.PASSWORD))
 
 def send_location_dm(twitter, handle):
 	twitter.send_direct_message(screen_name=handle, text="Cheee, no podemos darnos cuenta de donde estas. Mandanos un DM con tu ubicacion! Gracias.")
