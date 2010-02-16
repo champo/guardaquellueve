@@ -1,4 +1,7 @@
+import logging
+
 from google.appengine.ext import webapp, db
+from google.appengine.ext.webapp.util import run_wsgi_app
 
 from entities import Location
 from weather.utils import get_next_rainy_day
@@ -17,10 +20,12 @@ class FetchLocationForecast(webapp.RequestHandler):
 			place.next_rain_datetime = forecast[0]
 			place.changed_prediction = True
 		db.put(place)
+		logging.debug('Updated %s forecast' % (place.name, ))
 
 def main():
+	logging.getLogger().setLevel(logging.DEBUG)
 	application = webapp.WSGIApplication([
-		('/task/fetch_location', FetchLocationForecast)
+		('/task/fetchlocation', FetchLocationForecast)
 		], debug=True)
 	run_wsgi_app(application)
 

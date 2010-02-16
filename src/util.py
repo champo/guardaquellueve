@@ -9,6 +9,10 @@ from weather.utils import *
 
 STOP_KEYWORD = 'basta'
 RESTART_KEYWORD = 'volve'
+WHERE_KEYWORD = 'donde'
+HELP_KEYWORD = 'help'
+ABOUT_KEYWORD = 'about'
+FORECAST_KEYWORD = 'pronosticar'
 
 def login_twitter_bot():
 	return tweepy.API(auth_handler=tweepy.BasicAuthHandler('guardaquellueve', 'panchito123'))
@@ -25,6 +29,32 @@ def send_success_dm(twitter, handle):
 def send_stop_dm(twitter, handle):
 	twitter.send_direct_message(screen_name=handle, text="Ya no te van a llegar mas updates. Chau ortiva.")
 	logging.debug("Stopped sending updates to %s" % (handle, ))
+
+def send_help_dm(twitter, handle):
+	commands = ', '.join([
+		STOP_KEYWORD,
+		RESTART_KEYWORD,
+		WHERE_KEYWORD,
+		HELP_KEYWORD,
+		ABOUT_KEYWORD,
+		FORECAST_KEYWORD])
+
+	text = "Los comandos son: %s" % (commands, )
+	twitter.send_direct_message(screen_name=handle, text=text)
+	logging.debug("Sending help to %s" % (handle, ))
+
+def send_about_dm(twitter, handle):
+	twitter.send_direct_message(screen_name=handle, text='Te aviso cuando va a llover donde estes. Mis creadores son @eordano y @elchampo.')
+	logging.debug("Sending about to %s" % (handle, ))
+
+def send_where_dm(twitter, user):
+	if user.location is None:
+		text = 'Disculpa, todavia no sabemos donde estas. Mandanos un DM que diga donde estas!'
+	else:
+		text = 'Estas en %s' % (user.location.name, )
+
+	twitter.send_direct_message(screen_name=user.screen_name, text=text)
+	logging.debug("Sending %s a location DM" % (user.screen_name, ))
 
 def follow_user_and_get(twitter, handle):
 	if twitter.exists_friendship(user_a='guardaquellueve', user_b=handle):

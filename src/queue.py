@@ -5,7 +5,7 @@ class QueueHandler(object):
 	@staticmethod
 	def queue_fetch(location_key, countdown=15):
 
-		taskqueue.add(url='/cron/fetch', params={'location': location_key}, countdown=countdown)
+		taskqueue.add(url='/task/fetchlocation', params={'location_key': location_key}, countdown=countdown)
 
 	@staticmethod
 	def queue_notify(message, user_key_list, countdown=15):
@@ -17,4 +17,4 @@ class QueueHandler(object):
 			  'message': message,
 			  'users': user_key_list
 			  }
-		taskqueue.add(url='/cron/dm', params=params, countdown=countdown)
+		taskqueue.add(url='/cron/notify/dm', params=params, countdown=countdown)

@@ -9,9 +9,12 @@ from util import *
 import tweepy
 
 from entities import Location, User
+from queue import QueueHandler
 
 
 class RainNotification(webapp.RequestHandler):
+
+	DM_PER_REQUEST = 5
 
 	def _format_message(location):
 		raise NotImplementedError()
@@ -27,12 +30,15 @@ class RainNotification(webapp.RequestHandler):
 		logging.debug("The rainy places are: "+str([location.name for location in rainy_places]))
 		for place in all_places:
 			if place in rainy_places:
-				users = User.all().filter('location =', place).filter('active =', True)
-				logging.debug("Sending messages to these users: "+str([u.screen_name for u in users]))
+				users = list(User.all(keys_only=True).filter('location =', place).filter('active =', True))
 				message = self._format_message(place)
-				logging.debug("The message being sent is: "+message)
-				for user in users:
-					twitter.send_direct_message(screen_name=user.screen_name, text=message)
+
+				user_len = len(users)
+				for i in range(0, user_len / RainNotification.DM_PER_REQUEST + 1):
+					slice = users[i*RainNotification.DM_PER_REQUEST:(i + 1)*RainNotification.DM_PER_REQUEST]
+
+					if len(slice) > 0:
+						QueueHandler.queue_notify(message, slice, i*10)
 			else:
 				place.last_broadcast_rain = False
 
@@ -70,11 +76,30 @@ class DailyNotification(RainNotification):
 		return [l for l in locations if l.next_rain_datetime
 			and l.next_rain_datetime > min_time]
 
+class DirectMessage(webapp.RequestHandler):
+
+	def post(self):
+		user_key_list = self.request.get_all('users')
+		message = self.request.get('message')
+
+		users = User.get(user_key_list)
+		twitter = login_twitter_bot()
+
+		logging.debug("Sending messages to these users: "+str([u.screen_name for u in users]))
+		logging.debug("The message being sent is: "+message)
+
+		for user in users:
+			try:
+				twitter.send_direct_message(screen_name=user.screen_name, text=message)
+			except:
+				pass
+
 def main():
 	logging.getLogger().setLevel(logging.DEBUG)
 	application = webapp.WSGIApplication([
 		('/cron/notify/daily', DailyNotification),
-		('/cron/notify/hourly', HourlyNotification)
+		('/cron/notify/hourly', HourlyNotification),
+		('/cron/notify/dm', DirectMessage)
 		], debug=True)
 	run_wsgi_app(application)
 

@@ -41,11 +41,22 @@ class TwitterMailHandler(InboundMailHandler):
 				.replace('\r', ' ')
 
 		twitter = login_twitter_bot()
+		logging.debug(dm_body)
 
 		if dm_body == STOP_KEYWORD:
 			unfollow(twitter, sender)
 		elif dm_body == RESTART_KEYWORD:
 			refollow(twitter, sender)
+		elif dm_body == HELP_KEYWORD:
+			send_help_dm(twitter, sender)
+		elif dm_body == WHERE_KEYWORD:
+			user = User.all().filter('screen_name =', sender).get()
+			if user is None:
+				logging.warning('An unknown user sent a DM (%s)' % (sender, ))
+			else:
+				send_where_dm(twitter, user)
+		elif dm_body == ABOUT_KEYWORD:
+			send_about_dm(twitter, sender)
 		else:
 			user = User.all().filter('screen_name =', sender).get()
 			if user is None:
