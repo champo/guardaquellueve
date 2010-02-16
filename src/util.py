@@ -36,8 +36,7 @@ def send_help_dm(twitter, handle):
 		RESTART_KEYWORD,
 		WHERE_KEYWORD,
 		HELP_KEYWORD,
-		ABOUT_KEYWORD,
-		FORECAST_KEYWORD])
+		ABOUT_KEYWORD])
 
 	text = "Los comandos son: %s" % (commands, )
 	twitter.send_direct_message(screen_name=handle, text=text)

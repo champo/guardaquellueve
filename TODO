@@ -2,8 +2,8 @@
   TODO
 ===============
 
-    * DM de "encontrado" debería decirte donde te encontró
-    * 'ayuda' debería decirte que comandos hay disponibles
+    * DM de "encontrado" debería decirte donde te encontró - DONE ( es 'donde' )
+    * 'ayuda' debería decirte que comandos hay disponibles - DONE ( es 'help' )
     * Buscar al usuario tendría que hacerse al escribir "mudarme a" o algo parecido
-    * hacer una queue para las API calls a twitter
+    * hacer una queue para las API calls a twitter - DONE
     * 'pronostico' manda el mensaje de acuerdo al pronostico en la location del user
