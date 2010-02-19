@@ -12,7 +12,7 @@ from weather.utils import get_next_rainy_day
 class FetchForecast(webapp.RequestHandler):
 	def get(self):
 		places = list(Location.all(keys_only=True))
-		for i in range(len(places)):
+		for i in xrange(len(places)):
 			QueueHandler.queue_fetch(places[i], 5*i)
 
 def main():

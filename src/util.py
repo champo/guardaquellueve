@@ -81,6 +81,10 @@ def unfollow(twitter, handle):
 
 	send_stop_dm(twitter, handle)
 
+def pronosticar(twitter, handle):
+	send_text = "La proxima vez que llueve por tus pagos será el "
+	twitter.send_direct_message(screen_name=handle, text=send_text)
+
 def follow(twitter, handle):
 	user_data = follow_user_and_get(twitter, handle)
 	if user_data is None:
@@ -142,4 +146,3 @@ def find_location(location):
 		location_entity.put()
 
 	return location_entity
-
