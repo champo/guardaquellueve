@@ -13,7 +13,7 @@ RESTART_KEYWORD = 'volve'
 WHERE_KEYWORD = 'donde'
 HELP_KEYWORD = 'help'
 ABOUT_KEYWORD = 'about'
-FORECAST_KEYWORD = 'pronosticar'
+FORECAST_KEYWORD = 'pronostico'
 
 def login_twitter_bot():
 	return tweepy.API(auth_handler=tweepy.BasicAuthHandler(credentials.USERNAME, credentials.PASSWORD))
@@ -23,7 +23,13 @@ def send_location_dm(twitter, handle):
 	logging.debug("Sent %s a DM" % (handle, ))
 
 def send_success_dm(twitter, handle):
-	text = "Ya te van a llegar los updates cuando llueva por tus pagos! Si no queres que te lleguen mas, manda un DM que diga '%s'." %(STOP_KEYWORD, )
+	location = None
+	try:
+		location = User.all().filter('screen_name =', handle).get().location
+	except:
+		logging.error("Error getting %s's data."%(handle, ))
+		return
+	text = "Te avisaremos cuando llueva por tus pagos, en %s! Cancela el servicio mandando '%s'." %(location.name, STOP_KEYWORD)
 	twitter.send_direct_message(screen_name=handle, text=text)
 	logging.debug("Successfully found %s" % (handle, ))
 
@@ -37,7 +43,8 @@ def send_help_dm(twitter, handle):
 		RESTART_KEYWORD,
 		WHERE_KEYWORD,
 		HELP_KEYWORD,
-		ABOUT_KEYWORD])
+		ABOUT_KEYWORD,
+		FORECAST_KEEYWORD])
 
 	text = "Los comandos son: %s" % (commands, )
 	twitter.send_direct_message(screen_name=handle, text=text)
@@ -81,10 +88,6 @@ def unfollow(twitter, handle):
 
 	send_stop_dm(twitter, handle)
 
-def pronosticar(twitter, handle):
-	send_text = "La proxima vez que llueve por tus pagos será el "
-	twitter.send_direct_message(screen_name=handle, text=send_text)
-
 def follow(twitter, handle):
 	user_data = follow_user_and_get(twitter, handle)
 	if user_data is None:
@@ -106,14 +109,14 @@ def follow(twitter, handle):
 def refollow(twitter, handle):
 	he_follows = twitter.exists_friendship(user_a=handle, user_b='guardaquellueve')
 	if not he_follows:
-		text = "Che @%s haceme follow o no te puedo mandar updates! Hace follow y manda un DM con '%s'" % (handle, RESTART_KEYWORD)
+		text = "Che @%s seguime o no te puedo mandar updates! Una vez que estes siguiendome, mandame un DM con '%s'" % (handle, RESTART_KEYWORD)
 		try:
 			last_status = twitter.user_timeline(screen_name=handle)[0].id
 		except:
 			last_status = None
 
 		twitter.update_status(status=text, in_reply_to_status_id=last_status)
-		logging.debug('User %s tried to restart but its not following me' % (handle, ))
+		logging.debug('User %s tried to restart but it\'s not following me' % (handle, ))
 		return
 
 	follow(twitter, handle)
@@ -146,3 +149,14 @@ def find_location(location):
 		location_entity.put()
 
 	return location_entity
+
+def send_forecast_dm(twitter, handle):
+	location = None
+	try:
+		location = User.all().filter('screen_name =', handle).get().location
+	except:
+		logging.error('User or location not found!')
+		return
+	date = location.next_rain_datetime + datetime.timedelta(hours=location.timezone)
+	twitter.send_direct_message(screen_name=handle, text='Pronosticado lluvia para el '+str(date.day)+' a las '+str(date.hour))
+	logging.debug('User %s asked for forecast. Sent.'%(handle, ))

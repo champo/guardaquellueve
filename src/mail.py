@@ -57,6 +57,8 @@ class TwitterMailHandler(InboundMailHandler):
 				send_where_dm(twitter, user)
 		elif dm_body == ABOUT_KEYWORD:
 			send_about_dm(twitter, sender)
+		elif dm_body == FORECAST_KEYWORD:
+			send_forecast_dm(twitter, sender)
 		else:
 			user = User.all().filter('screen_name =', sender).get()
 			if user is None:

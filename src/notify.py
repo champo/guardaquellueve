@@ -68,7 +68,7 @@ class DailyNotification(RainNotification):
 	def _format_message(self, location):
 		day = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'][location.next_rain_datetime.weekday()]
 
-		place.last_broadcast_rain = False
+		location.last_broadcast_rain = False
 		return u"Pronosticado lluvia para el %s en tu ciudad, %s." % (day, location.name)
 
 	def _get_locations(self, locations):

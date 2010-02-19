@@ -4,7 +4,7 @@
 
     * DM de "encontrado" debería decirte donde te encontró - DONE ( es 'donde' )
     * 'ayuda' debería decirte que comandos hay disponibles - DONE ( es 'help' )
-    * Buscar al usuario tendría que hacerse al escribir "mudarme a" o algo parecido
+    * Buscar al usuario tendría que hacerse al escribir "mudarme a" o algo parecido - CANCELED
     * hacer una queue para las API calls a twitter - DONE
     * hacer una queue para las API calls a twitter - DONE
-    * 'pronostico' manda el mensaje de acuerdo al pronostico en la location del user
+    * 'pronostico' manda el mensaje de acuerdo al pronostico en la location del user - DONE
