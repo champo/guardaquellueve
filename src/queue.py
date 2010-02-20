@@ -18,3 +18,8 @@ class QueueHandler(object):
 			  'users': user_key_list
 			  }
 		taskqueue.add(url='/cron/notify/dm', params=params, countdown=countdown)
+
+	@staticmethod
+	def queue_hourly_notify(location_key, countdown=15):
+
+		taskqueue.add(url='/cron/notify/hourly', params={'location': location_key}, countdown=countdown)

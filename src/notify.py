@@ -10,21 +10,21 @@ import tweepy
 
 from entities import Location, User
 from queue import QueueHandler
+from weather.utils import currently_raining
 
 
 class RainNotification(webapp.RequestHandler):
 
 	DM_PER_REQUEST = 5
 
-	def _format_message(location):
+	def _format_message(self, location):
 		raise NotImplementedError()
 
-	def _get_locations(locations):
+	def _get_locations(self):
 		raise NotImplementedError()
 
 	def get(self):
-		all_places = list(Location.all())
-		rainy_places = self._get_locations(all_places)
+		all_places, rainy_places = self._get_locations()
 		twitter = login_twitter_bot()
 
 		logging.debug("The rainy places are: "+str([location.name for location in rainy_places]))
@@ -45,23 +45,32 @@ class RainNotification(webapp.RequestHandler):
 		db.put(all_places)
 
 
+class HourlyFetch(webapp.RequestHandler):
+	def get(self):
+		i = 0
+		for place in Location.all(keys_only=True):
+			QueueHandler.queue_hourly_notify(place, i*10)
+			i = i + 1
+
 class HourlyNotification(RainNotification):
 	def _format_message(self, location):
 		if location.last_broadcast_rain:
 			return "Sigue lloviendo en %s!" % (location.name, )
 		else:
-			hours = (location.next_rain_datetime - datetime.datetime.utcnow()).seconds/3600
 			location.last_broadcast_rain = True
-			return "Va a llover en menos de %d horas en %s" % (hours, location.name, )
+			return "Guarda que llueve en %s!" % (location.name, )
 
-	def _get_locations(self, locations):
-		max_time = datetime.datetime.utcnow() + datetime.timedelta(hours=6, minutes=-5)
-		min_time = datetime.datetime.utcnow() - datetime.timedelta(hours=6, minutes=-5)
+	def _get_locations(self):
+		location_id = self.request.get('location')
+		location = Location.get(location_id)
 
-		return [ l for l in locations if l.next_rain_datetime
-			and l.next_rain_datetime < max_time
-			and l.next_rain_datetime > min_time]
+		if currently_raining(location.station):
+			return [[location], [location]]
+		else:
+			return [[location], []]
 
+	def post(self):
+		self.get()
 
 class DailyNotification(RainNotification):
 
@@ -71,10 +80,13 @@ class DailyNotification(RainNotification):
 		location.last_broadcast_rain = False
 		return u"Pronosticado lluvia para el %s en tu ciudad, %s." % (day, location.name)
 
-	def _get_locations(self, locations):
+	def _get_locations(self):
+		locations = list(Location.all())
 		min_time = datetime.datetime.utcnow() + datetime.timedelta(hours=22)
-		return [l for l in locations if l.next_rain_datetime
-			and l.next_rain_datetime > min_time]
+		return [
+			locations,
+			[l for l in locations if l.next_rain_datetime and l.next_rain_datetime > min_time]
+			]
 
 class DirectMessage(webapp.RequestHandler):
 
@@ -99,7 +111,8 @@ def main():
 	application = webapp.WSGIApplication([
 		('/cron/notify/daily', DailyNotification),
 		('/cron/notify/hourly', HourlyNotification),
-		('/cron/notify/dm', DirectMessage)
+		('/cron/notify/dm', DirectMessage),
+		('/cron/notify/fetch', HourlyFetch)
 		], debug=True)
 	run_wsgi_app(application)
 
